@@ -5,6 +5,12 @@ import sys
 import pandas as pd
 from sqlalchemy import create_engine
 
+import logging
+
+import pyarrow.parquet  as pq
+# Set the SQLAlchemy logging level to DEBUG
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.DEBUG)
 
 def write_data_postgres(dataframe: pd.DataFrame) -> bool:
     """
@@ -68,9 +74,12 @@ def main() -> None:
     parquet_files = [f for f in os.listdir(folder_path) if
                      f.lower().endswith('.parquet') and os.path.isfile(os.path.join(folder_path, f))]
 
+    i = 1
     for parquet_file in parquet_files:
+        if (i == 3):
+            i += 1
+            continue
         parquet_df: pd.DataFrame = pd.read_parquet(os.path.join(folder_path, parquet_file), engine='pyarrow')
-
         clean_column_name(parquet_df)
         if not write_data_postgres(parquet_df):
             del parquet_df
